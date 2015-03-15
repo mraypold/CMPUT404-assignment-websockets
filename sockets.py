@@ -22,7 +22,7 @@ import time
 import json
 import os
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='')
 sockets = Sockets(app)
 app.debug = True
 
@@ -31,7 +31,7 @@ class World:
         self.clear()
         # we've got listeners now!
         self.listeners = list()
-        
+
     def add_set_listener(self, listener):
         self.listeners.append( listener )
 
@@ -55,25 +55,30 @@ class World:
 
     def get(self, entity):
         return self.space.get(entity,dict())
-    
+
     def world(self):
         return self.space
 
-myWorld = World()        
+myWorld = World()
 
 def set_listener( entity, data ):
     ''' do something with the update ! '''
 
 myWorld.add_set_listener( set_listener )
-        
+
 @app.route('/')
 def hello():
     '''Return something coherent here.. perhaps redirect to /static/index.html '''
-    return None
+    return app.send_static_file('index.html')
 
 def read_ws(ws,client):
     '''A greenlet function that reads from the websocket and updates the world'''
     # XXX: TODO IMPLEMENT ME
+    while True:
+        msg = ws.receive()
+        ws.send(msg)
+
+
     return None
 
 @sockets.route('/subscribe')
@@ -97,25 +102,31 @@ def flask_post_json():
 @app.route("/entity/<entity>", methods=['POST','PUT'])
 def update(entity):
     '''update the entities via this interface'''
-    return None
+    json = request.get_json(force = True, silent = True, cache = True)
+    myWorld.set(entity, json)
 
-@app.route("/world", methods=['POST','GET'])    
+    return jsonify(**myWorld.get(entity))
+
+@app.route("/world", methods=['POST','GET'])
 def world():
     '''you should probably return the world here'''
-    return None
+    return jsonify(**myWorld.world())
 
-@app.route("/entity/<entity>")    
+@app.route("/entity/<entity>")
 def get_entity(entity):
     '''This is the GET version of the entity interface, return a representation of the entity'''
-    return None
-
+    return jsonify(**myWorld.get(entity))
 
 @app.route("/clear", methods=['POST','GET'])
 def clear():
     '''Clear the world out!'''
-    return None
+    myWorld.clear()
 
+    if request.method == 'POST':
+        return jsonify(**myWorld.world())
 
+    if request.method == 'GET':
+        return redirect(url_for('hello'))
 
 if __name__ == "__main__":
     ''' This doesn't work well anymore:
