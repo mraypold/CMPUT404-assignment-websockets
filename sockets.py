@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
-# Copyright (c) 2013-2014 Abram Hindle
+# Copyright (c) 2013-2015 Abram Hindle, Michael Raypold
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -35,6 +35,9 @@ class World:
     def add_set_listener(self, listener):
         self.listeners.append( listener )
 
+    def remove_listener(self, listener):
+        self.listeners.remove( listener )
+
     def update(self, entity, key, value):
         entry = self.space.get(entity,dict())
         entry[key] = value
@@ -48,7 +51,10 @@ class World:
     def update_listeners(self, entity):
         '''update the set listeners'''
         for listener in self.listeners:
-            listener(entity, self.get(entity))
+            try:
+                set_listener(listener, entity, self.get(entity))
+            except:
+                pass
 
     def clear(self):
         self.space = dict()
@@ -61,8 +67,13 @@ class World:
 
 myWorld = World()
 
-def set_listener( entity, data ):
+def set_listener(ws, entity, data ):
     ''' do something with the update ! '''
+    msg = {}
+    msg[entity] = data
+
+    # jsonify not working here...Have to use json.dumps
+    ws.send(json.dumps(msg))
 
 myWorld.add_set_listener( set_listener )
 
@@ -71,23 +82,43 @@ def hello():
     '''Return something coherent here.. perhaps redirect to /static/index.html '''
     return app.send_static_file('index.html')
 
-def read_ws(ws,client):
+def read_ws(ws):
     '''A greenlet function that reads from the websocket and updates the world'''
-    # XXX: TODO IMPLEMENT ME
-    while True:
-        msg = ws.receive()
-        ws.send(msg)
+    try:
+        while True:
+            msg = ws.receive()
+            print 'received %s' %(msg)
 
-
+            if msg:
+                packet = json.loads(msg)
+                for k,v in packet.items():
+                    myWorld.set(k, v)
+    except:
+        pass
     return None
 
 @sockets.route('/subscribe')
 def subscribe_socket(ws):
     '''Fufill the websocket URL of /subscribe, every update notify the
-       websocket and read updates from the websocket '''
-    # XXX: TODO IMPLEMENT ME
-    return None
+       websocket and read updates from the websocket
 
+    Source https://github.com/abramhindle/WebSocketsExamples/blob/master/chat.py
+    '''
+    myWorld.add_set_listener(ws)
+    ws.send(json.dumps(myWorld.world()))
+    g = gevent.spawn( read_ws, ws )
+
+    try:
+        while True:
+            # Blocking
+            time.sleep(1)
+    except Exception as e:
+        print "WS Error %s" % e
+    finally:
+        myWorld.remove_listener(ws)
+        gevent.kill(g)
+
+    return None
 
 def flask_post_json():
     '''Ah the joys of frameworks! They do so much work for you

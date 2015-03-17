@@ -43,21 +43,21 @@
 
 ** Requirements
 
-   - [ ] Implement the Websockets Javascript parts in the HTML file static/index.htm
-   - [ ] Implement the Websockets send/recv part of the webservice
-   - [ ] Upon update all the clients should recv a websocket update message
-   - [ ] Use JSON or XML to communicate (no plain text!)
-   - [ ] The webservice can pass all the tests in freetests.py
-   - [ ] The webservice can serve /static/index.html
-   - [ ] static/index.html displays the current state of the webservice
-   - [ ] static/index.html responds to clicks within 100ms on average
-   - [ ] Make static/index.html images look nice
+   - [x] Implement the Websockets Javascript parts in the HTML file static/index.htm
+   - [x] Implement the Websockets send/recv part of the webservice
+   - [x] Upon update all the clients should recv a websocket update message
+   - [x] Use JSON or XML to communicate (no plain text!)
+   - [x] The webservice can pass all the tests in freetests.py
+   - [x] The webservice can serve /static/index.html
+   - [x] static/index.html displays the current state of the webservice
+   - [x] static/index.html responds to clicks within 100ms on average
+   - [x] Make static/index.html images look nice
 
- 
+
 ** Restrictions
-   - [ ] Use Python 2.7
-   - [ ] Must run in the undergrad lab (Ubuntu 12.04)
-   - [ ] License your code properly (use an OSI approved license)
+   - [x] Use Python 2.7
+   - [x] Must run in the undergrad lab (Ubuntu 12.04)
+   - [x] License your code properly (use an OSI approved license)
      - Put your name on it!
 
 ** Submission Instructions
@@ -76,11 +76,10 @@
      bash runtests.sh
 
    - Marks will be deducted if I cannot successfully do this.
-     
+
    - Marks will be deducted for using library code that does the assignment
 
 ** Marking
-   - 4 marks for passing all of the tests 
+   - 4 marks for passing all of the tests
    - 2 marks for being usable in the browser
    - 1 mark for looking better than what I gave you
-     
