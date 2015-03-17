@@ -75,7 +75,7 @@ def set_listener(ws, entity, data ):
     # jsonify not working here...Have to use json.dumps
     ws.send(json.dumps(msg))
 
-myWorld.add_set_listener( set_listener )
+# myWorld.add_set_listener( set_listener )
 
 @app.route('/')
 def hello():
